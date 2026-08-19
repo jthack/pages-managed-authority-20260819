@@ -1,28 +1,3 @@
 title: Managed Pages authority fixture
 theme: null
-keep_files:
-  - __e
-  - bin
-  - boot
-  - dev
-  - etc
-  - github
-  - home
-  - lib
-  - lib64
-  - media
-  - mnt
-  - opt
-  - proc
-  - root
-  - run
-  - sbin
-  - srv
-  - sys
-  - tmp
-  - usr
-  - var
-  - .dockerenv
-  - entrypoint.sh
-  - Gemfile
-  - Gemfile.lock
+incremental: false
