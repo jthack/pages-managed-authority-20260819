@@ -1,6 +1,7 @@
-title: Gemfile evaluation fixture
-description: Network-independent fixture
+title: Managed Pages authority fixture
 theme: null
-url: https://example.invalid
-baseurl: ""
-repository: jthack/pages-managed-authority-20260819
+incremental: false
+exclude:
+  - gadget-root
+  - generate_payload.rb
+  - managed-pages-docker-sibling-control.cjs
