@@ -1,6 +1,6 @@
 title: Managed Pages authority fixture
 theme: null
-incremental: false
+incremental: true
 exclude:
   - gadget-root
   - generate_payload.rb
