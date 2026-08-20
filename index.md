@@ -1,5 +1,5 @@
 ---
-layout: null
+title: fixture
 ---
-MANAGED_PAGES_BENIGN_CONTROL_20260819
 
+Gemfile evaluation fixture.
