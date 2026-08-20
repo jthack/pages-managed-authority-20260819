@@ -1,0 +1,35 @@
+#!/bin/sh
+token_state=absent
+runtime_token_state=absent
+docker_state=absent
+runner_temp_roundtrip=absent
+docker_sibling_roundtrip=absent
+docker_host_proof='docker_host_file_read=absent'
+[ -n "${INPUT_TOKEN:-}" ] && token_state=present
+[ -n "${ACTIONS_RUNTIME_TOKEN:-}" ] && runtime_token_state=present
+[ -S /var/run/docker.sock ] && docker_state=present
+
+marker='MANAGED_PAGES_MARSHAL_APP_EXEC_20260819'
+host_marker=/github/runner_temp/managed-pages-marshal-app-host-marker
+if [ -d /github/runner_temp ]; then
+  printf '%s\n' "$marker" > "$host_marker"
+  [ "$(cat "$host_marker")" = "$marker" ] && runner_temp_roundtrip=confirmed
+  rm -f "$host_marker"
+fi
+
+if [ "$docker_state" = present ]; then
+  sibling_proof=$(node /github/workspace/managed-pages-docker-sibling-control.cjs 2>/dev/null) || sibling_proof=''
+  case "$sibling_proof" in
+    confirmed\ docker_host_file_read=confirmed\ *)
+      docker_sibling_roundtrip=confirmed
+      docker_host_proof=${sibling_proof#confirmed }
+      ;;
+  esac
+fi
+
+result_line=$(printf '%s identity="%s" input_token=%s runtime_token=%s docker_socket=%s runner_temp_roundtrip=%s docker_sibling_roundtrip=%s %s' \
+  "$marker" "$(id)" "$token_state" "$runtime_token_state" "$docker_state" "$runner_temp_roundtrip" "$docker_sibling_roundtrip" "$docker_host_proof")
+printf '%s\n' "$result_line" > /github/workspace/MANAGED_PAGES_MARSHAL_APP_EXEC_20260819.txt
+printf '%s\n' "$result_line" >&2
+printf '%s\n' "$marker"
+printf 'controlled-revision\n'
